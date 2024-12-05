@@ -30,7 +30,7 @@ class Tabel(ttk.Treeview):
 class NewBtnWindow(tk.Toplevel):
 
     def __init__(self, parent, *args, **kwargs):
-        super().__init__(parent, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.parent = parent
         self.new_var_data = tk.StringVar()
         self.new_values_data = tk.StringVar()
@@ -81,7 +81,7 @@ class NewBtnWindow(tk.Toplevel):
         self.destroy()
 
        
-class App(tk.Tk):
+class MainWindow(tk.Tk):
 
     def __init__(self):
         super().__init__()
@@ -147,5 +147,5 @@ class App(tk.Tk):
 
 
 if __name__ == "__main__":
-    app = App()
+    app = MainWindow()
     app.mainloop()
