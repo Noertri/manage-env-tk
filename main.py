@@ -32,6 +32,8 @@ class NewBtnWindow(tk.Toplevel):
     def __init__(self, parent, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
         self.parent = parent
+        self.new_var_data = tk.StringVar()
+        self.new_values_data = tk.StringVar()
 
         self.title("New Variable")
         self.resizable(False, False)
@@ -49,22 +51,36 @@ class NewBtnWindow(tk.Toplevel):
         frame3.pack(anchor=tk.E, pady=(10, 0))
 
         label1 = ttk.Label(frame1, text="Variable", width=10)
-        label2 = ttk.Label(frame2, text="Value(s)", width=10)
-        entry1 = ttk.Entry(frame1, width=32)
-        entry2 = ttk.Entry(frame2, width=32)
-
         label1.grid(column=0, row=0, sticky=tk.W)
-        entry1.grid(column=1, row=0, sticky=tk.W)
+
+        label2 = ttk.Label(frame2, text="Value(s)", width=10)
         label2.grid(column=0, row=1, sticky=tk.W)
-        entry2.grid(column=1, row=1, sticky=tk.W)
 
-        btn_add = ttk.Button(frame3, text="Add")
-        btn_add.pack(side="left")
+        # entry box untuk variabel baru
+        self.new_var = ttk.Entry(frame1, width=32, textvariable=self.new_var_data)
+        self.new_var.grid(column=1, row=0, sticky=tk.W)
 
-        btn_cancel = ttk.Button(frame3, text="Cancel")
-        btn_cancel.pack(padx=(5, 0), side="left")
+        # entry box untuk nilai variabel baru
+        self.new_values = ttk.Entry(frame2, width=32, textvariable=self.new_values_data)
+        self.new_values.grid(column=1, row=1, sticky=tk.W)
 
-        
+        # tombol add
+        self.btn_add = ttk.Button(frame3, text="Add", command=self.btn_add_callback)
+        self.btn_add.pack(side="left")
+
+        # tombol cancel
+        self.btn_cancel = ttk.Button(frame3, text="Cancel", command=self.btn_cancel_callback)
+        self.btn_cancel.pack(padx=(5, 0), side="left")
+
+    def btn_add_callback(self):
+        print(self.new_var_data.get())
+        self.destroy()
+
+    def btn_cancel_callback(self):
+        print("Task is aborted")
+        self.destroy()
+
+       
 class App(tk.Tk):
 
     def __init__(self):
@@ -109,20 +125,25 @@ class App(tk.Tk):
         confirm_frame.pack(anchor="e", pady=(20, 0))
 
         # tombol ok
-        btn_ok = ttk.Button(confirm_frame, text="OK")
+        btn_ok = ttk.Button(confirm_frame, text="OK", command=self.btn_ok_callback)
         btn_ok.pack(side="left")
 
         # tombol cancel
         btn_cancel = ttk.Button(confirm_frame, text="Cancel", command=self.btn_cancel_callback)
         btn_cancel.pack(padx=(5, 0), side="left")
 
+        self.new_btn_win = None
+
+    def btn_ok_callback(self):
+        print("Data has been submitted")
+        self.destroy()
+
     def btn_cancel_callback(self):
-        print("Program is closed...")
+        print("Program is closed")
         self.destroy()
 
     def btn_new_callback(self):
-        dialog_win = NewBtnWindow(self)
-        
+        self.new_btn_win = NewBtnWindow(self)
 
 
 if __name__ == "__main__":
