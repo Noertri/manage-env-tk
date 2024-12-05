@@ -73,7 +73,7 @@ class NewBtnWindow(tk.Toplevel):
         self.btn_cancel.pack(padx=(5, 0), side="left")
 
     def btn_add_callback(self):
-        print(self.new_var_data.get())
+        self.parent.tabel.insert("", index=0, values=(self.new_var_data.get(), self.new_values_data.get()))
         self.destroy()
 
     def btn_cancel_callback(self):
