@@ -15,11 +15,15 @@ class Tabel(ttk.Treeview):
         self.column(0, width=200)
         self.column(1, width=300)
         self.bind("<Motion>", "break")
-        self.insert_envs()
+        self.bind()
+        self.load_envs()
 
-    def insert_envs(self):
+    def load_envs(self):
         for item in dict(os.environ).items():
             self.insert("", index=tk.END, values=item)
+
+    def selected_item(self, event=None):
+        pass
 
         
 class App(tk.Tk):
@@ -73,7 +77,9 @@ class App(tk.Tk):
         self.btn_cancel.pack(padx=(5, 0), side="left")
 
     def btn_cancel_callback(self, event=None):
+        print("Program is closed...")
         self.destroy()
+        return -1
 
 
 if __name__ == "__main__":
