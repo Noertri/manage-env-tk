@@ -6,6 +6,7 @@ from pathlib import Path
 import pickle
 import shutil
 import re
+import subprocess
 from popup_windows import NewBtnWindow
 
 
@@ -73,12 +74,9 @@ class MainWindow(tk.Tk):
         self.env_file_path = Path("{0}/.environment".format(Path.home()))
         self.env_vars = dict(sorted(os.environ.items(), key=lambda x: x[0]))
         self.app_data = {
-            "new": [],
-            "edit": [],
-            "env_file": dict()
+            "env_file": self.load_env_file()
         }
         self.init_app()
-        self.load_env_file()
 
         main_style = ttk.Style()
         main_style.configure("Treeview.Heading", font=tkfont.Font(weight="normal"))
@@ -109,7 +107,6 @@ class MainWindow(tk.Tk):
 
     def init_app(self):
         bashrc_path = Path("{0}/.bashrc".format(Path.home()))
-        profile_path = Path("{0}/.profile".format(Path.home()))
         
         script = 'if [ -f ~/.environment ]; then\n\tset -a\n\tsource ~/.environment\n\tset +a\nfi'
 
@@ -120,27 +117,29 @@ class MainWindow(tk.Tk):
                 f.write("\n"+script.strip()+"\n")
                 f.close()
 
-            with profile_path.open("a", encoding="utf-8") as f:
-                f.write(script.strip()+"\n")
-                f.close()
-
     def load_env_file(self):
         pattern = re.compile(r'([_A-Za-z0-9]+?)="(.*)"|([_A-Za-z0-9]+?)=(.*)')
+
+        env = dict()
 
         if self.env_file_path.exists():
             with self.env_file_path.open("r", encoding="utf-8") as f:
                 for line in f.readlines():
                     if line.startswith("#"):
                         continue
-                    matched = pattern.search(str(line.strip()))
-                    print("{0}".format({matched.group(1): matched.group(2)}))
+                    matched = pattern.search(line.strip())
+                    env[matched.group(1).strip()] = matched.group(2).strip()
                 f.close()
 
-        return {}
+        return env
 
     def btn_ok_callback(self):
-        print("Data has been submitted")
-        print(self.app_data)
+        with self.env_file_path.open("w", encoding="utf-8") as f:
+            for k, v in self.app_data["env_file"].items():
+                f.write(f'{k}="{v}"\n')
+            f.close()
+
+        print("Vriables has been saved")
         self.destroy()
 
     def btn_close_callback(self):
