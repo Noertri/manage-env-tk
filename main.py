@@ -63,9 +63,9 @@ class TabelFrame(ttk.LabelFrame):
 
 class MainWindow(tk.Tk):
 
-    def __init__(self):
+    def __init__(self, app_title):
         super().__init__()
-        self.title("Environment Variables")
+        self.title(app_title)
         # self.geometry("500x500")
         self.resizable(False, False)
         
@@ -101,9 +101,9 @@ class MainWindow(tk.Tk):
         btn_ok = ttk.Button(confirm_frame, text="OK", command=self.btn_ok_callback)
         btn_ok.pack(side="left")
 
-        # tombol cancel
-        btn_cancel = ttk.Button(confirm_frame, text="Cancel", command=self.btn_cancel_callback)
-        btn_cancel.pack(padx=(5, 0), side="left")
+        # tombol close
+        btn_close = ttk.Button(confirm_frame, text="Close", command=self.btn_close_callback)
+        btn_close.pack(padx=(5, 0), side="left")
 
         self.new_btn_win = None
 
@@ -143,11 +143,11 @@ class MainWindow(tk.Tk):
         print(self.app_data)
         self.destroy()
 
-    def btn_cancel_callback(self):
+    def btn_close_callback(self):
         print("Program is closed")
         self.destroy()
 
 
 if __name__ == "__main__":
-    app = MainWindow()
+    app = MainWindow("Environment Variables")
     app.mainloop()
