@@ -49,6 +49,7 @@ class NewBtnWindow(tk.Toplevel):
 
     def btn_add_callback(self):
         self.parent.tabel.insert("", index=0, values=(self.new_var_data.get(), self.new_values_data.get()))
+        self.parent.data["new"].append((self.new_var_data.get(), self.new_values_data.get()))
         self.destroy()
 
     def btn_cancel_callback(self):

@@ -32,17 +32,18 @@ class Tabel(ttk.Treeview):
 
 class TabelFrame(ttk.LabelFrame):
 
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, parent, data, *args, **kwargs):
         super().__init__(parent, text="User Variables", padding=(10, 10, 10, 10), *args, **kwargs)
         self.parent = parent
+        self.data = data
 
         # tabel
         self.tabel = Tabel(self, column=(0, 1), height=8)
-        self.tabel.pack(anchor="center")
+        self.tabel.pack(anchor="nw")
 
         # frame tombol new, edit, dan delete
         btn_frame = ttk.Frame(self)
-        btn_frame.pack(pady=(10, 0), anchor="e", side="bottom")
+        btn_frame.pack(pady=(10, 0), anchor="se", side="bottom")
 
         # tombol new
         btn_new = ttk.Button(btn_frame, text="New", command=self.btn_new_callback)
@@ -71,6 +72,11 @@ class MainWindow(tk.Tk):
         # inisialisai program
         self.env_file_path = Path("{0}/.environment".format(Path.home()))
         self.env_vars = dict(sorted(os.environ.items(), key=lambda x: x[0]))
+        self.app_data = {
+            "new": [],
+            "edit": [],
+            "env_file": dict()
+        }
         self.init_app()
         self.load_env_file()
 
@@ -82,14 +88,14 @@ class MainWindow(tk.Tk):
         main_frame.pack(anchor="center", padx=(20, 20), pady=(20, 20))
         
         # tabel frame
-        self.tabel_frame1 = TabelFrame(main_frame)
-        self.tabel_frame1.pack(anchor="center")
+        self.tabel_frame1 = TabelFrame(main_frame, self.app_data)
+        self.tabel_frame1.pack(anchor="nw")
 
         self.tabel: Tabel = self.tabel_frame1.tabel
 
         # frame tombol konfirmasi
         confirm_frame = ttk.Frame(main_frame)
-        confirm_frame.pack(side="bottom", anchor="e", pady=(20, 0))
+        confirm_frame.pack(side="bottom", anchor="se", pady=(10, 0))
 
         # tombol ok
         btn_ok = ttk.Button(confirm_frame, text="OK", command=self.btn_ok_callback)
@@ -108,10 +114,7 @@ class MainWindow(tk.Tk):
         script = 'if [ -f ~/.environment ]; then\n\tset -a\n\tsource ~/.environment\n\tset +a\nfi'
 
         if not self.env_file_path.exists():
-            with self.env_file_path.open("w", encoding="utf-8") as f:   # tulis environment variables ke file ~/.environment
-                for item in self.env_vars.items():
-                    f.write('''{0}="{1}"\n'''.format(*item))
-                f.close()
+            self.env_file_path.touch()
 
             with bashrc_path.open("a", encoding="utf-8") as f:
                 f.write("\n"+script.strip()+"\n")
@@ -137,7 +140,7 @@ class MainWindow(tk.Tk):
 
     def btn_ok_callback(self):
         print("Data has been submitted")
-        
+        print(self.app_data)
         self.destroy()
 
     def btn_cancel_callback(self):
