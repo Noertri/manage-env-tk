@@ -27,9 +27,6 @@ class NewBtnWindow(tk.Toplevel):
         btn_frame = ttk.Frame(frame0)
         btn_frame.pack(anchor="se", pady=(25, 0), side="right")
 
-        btn_frame2 = ttk.Frame(frame0)
-        btn_frame2.pack(anchor="sw", pady=(25, 0))
-
         label1 = ttk.Label(frame1, text="Variable", width=10)
         label1.grid(column=0, row=0, sticky=tk.W)
 
@@ -43,10 +40,6 @@ class NewBtnWindow(tk.Toplevel):
         # entry box untuk nilai variabel baru
         new_values = ttk.Entry(frame2, width=52, textvariable=self.new_values_data)
         new_values.grid(column=1, row=1, sticky=tk.W)
-
-        # tombol browse
-        btn_browse = ttk.Button(btn_frame2, text="Browse", command=self.btn_browse_callback)
-        btn_browse.pack()
 
         # tombol add
         btn_add = ttk.Button(btn_frame, text="Add", command=self.btn_add_callback)
@@ -68,8 +61,22 @@ class NewBtnWindow(tk.Toplevel):
         print("Task is aborted")
         self.destroy()
 
-    def btn_browse_callback(self):
-        pass
+
+class ListBoxPanel(ttk.Frame):
+
+    def __init__(self, parent, data, *args, **kwargs):
+        super().__init__(parent, *args, **kwargs)
+        self.parent = parent
+        self.data = data
+
+        list_box = tk.Listbox(self, width=30)
+        list_box.pack(side="left")
+
+        btn_frame = ttk.Frame(self)
+        btn_frame.pack(anchor="n", padx=(10, 0))
+
+        btn_new = ttk.Button(btn_frame, text="New")
+        btn_new.pack()
 
 
 class EditBtnWindow(tk.Toplevel):
@@ -81,20 +88,17 @@ class EditBtnWindow(tk.Toplevel):
         self.title("Edit Variable")
         # self.resizable(False, False)
 
-        frame = ttk.Frame(self)
-        frame.pack(anchor="nw", padx=(20, 20), pady=(20, 20))
+        frame0 = ttk.Frame(self)
+        frame0.pack(anchor="nw", padx=(20, 20), pady=(20, 20))
+        
+        list_box_panel = ListBoxPanel(frame0, self.parent.tabel)
+        list_box_panel.pack()
 
-        entry_frame = ttk.Frame(frame)
-        entry_frame.pack(side="left")
+        btn_frame = ttk.Frame(frame0)
+        btn_frame.pack(side="bottom", anchor="se", pady=(25, 0))
 
-        btn_frame = ttk.Frame(frame)
-        btn_frame.pack(side="left", padx=(10, 0))
+        btn_ok = ttk.Button(btn_frame, text="OK")
+        btn_ok.pack(side="left")
 
-        label1 = ttk.Label(entry_frame, text="Variable", width=10)
-        label1.grid(column=0, row=0)
-
-        entry1 = ttk.Entry(entry_frame, width=32, state="disable")
-        entry1.grid(column=1, row=0)
-
-        btn1 = ttk.Button(btn_frame, text="OK")
-        btn1.pack()
+        btn_cancel = ttk.Button(btn_frame, text="Cancel")
+        btn_cancel.pack(padx=(10, 0))

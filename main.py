@@ -29,7 +29,7 @@ class Tabel(ttk.Treeview):
             self.insert("", index=tk.END, values=item)
 
 
-class TabelFrame(ttk.LabelFrame):
+class TabelPanel(ttk.LabelFrame):
 
     def __init__(self, parent, data, *args, **kwargs):
         super().__init__(parent, text="User Variables", padding=(10, 10, 10, 10), *args, **kwargs)
@@ -87,10 +87,10 @@ class MainWindow(tk.Tk):
         main_frame.pack(padx=(20, 20), pady=(20, 20))
         
         # tabel frame
-        self.tabel_frame1 = TabelFrame(main_frame, self.app_data)
-        self.tabel_frame1.pack(anchor="center")
+        self.tabel_panel = TabelPanel(main_frame, self.app_data)
+        self.tabel_panel.pack(anchor="center")
 
-        self.tabel: Tabel = self.tabel_frame1.tabel
+        self.tabel = self.tabel_panel.tabel
 
         # frame tombol konfirmasi
         confirm_frame = ttk.Frame(main_frame)
