@@ -13,7 +13,7 @@ class NewBtnWindow(tk.Toplevel):
         self.title("New Variable")
         self.resizable(False, False)
 
-        frame0 = ttk.Frame(self)
+        frame0 = ttk.Frame(self, relief="sunken", padding=(10, 10, 10, 10))
         frame0.pack(anchor="center", padx=(20, 20), pady=(20, 20))
 
         frame1 = ttk.Frame(frame0)

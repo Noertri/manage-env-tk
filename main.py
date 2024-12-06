@@ -4,6 +4,8 @@ import tkinter.font as tkfont
 import os
 from pathlib import Path
 import pickle
+import shutil
+import re
 from popup_windows import NewBtnWindow
 
 
@@ -28,31 +30,18 @@ class Tabel(ttk.Treeview):
             self.insert("", index=tk.END, values=item)
 
 
-class MainWindow(tk.Tk):
+class TabelFrame(ttk.LabelFrame):
 
-    def __init__(self):
-        super().__init__()
-        self.title("Environment Variables")
-        # self.geometry("500x500")
-        self.resizable(False, False)
-        
-        main_style = ttk.Style()
-        main_style.configure("Treeview.Heading", font=tkfont.Font(weight="normal"))
-
-        # frame utama
-        main_frame = ttk.Frame(self)
-        main_frame.pack(anchor="center", padx=(20, 20), pady=(20, 20))
-        
-        # label frame
-        label_frame1 = ttk.LabelFrame(main_frame, text="User Variables", padding=(10, 10, 10, 10))
-        label_frame1.pack(anchor="center")
+    def __init__(self, parent, *args, **kwargs):
+        super().__init__(parent, text="User Variables", padding=(10, 10, 10, 10), *args, **kwargs)
+        self.parent = parent
 
         # tabel
-        self.tabel = Tabel(label_frame1, column=(0, 1), height=8)
+        self.tabel = Tabel(self, column=(0, 1), height=8)
         self.tabel.pack(anchor="center")
 
         # frame tombol new, edit, dan delete
-        btn_frame = ttk.Frame(label_frame1)
+        btn_frame = ttk.Frame(self)
         btn_frame.pack(pady=(10, 0), anchor="e", side="bottom")
 
         # tombol new
@@ -67,9 +56,40 @@ class MainWindow(tk.Tk):
         btn_del = ttk.Button(btn_frame, text="Delete")
         btn_del.pack(padx=(5, 0), side="left")
 
+    def btn_new_callback(self):
+        self.new_btn_win = NewBtnWindow(self)
+
+
+class MainWindow(tk.Tk):
+
+    def __init__(self):
+        super().__init__()
+        self.title("Environment Variables")
+        # self.geometry("500x500")
+        self.resizable(False, False)
+        
+        # inisialisai program
+        self.env_file_path = Path("{0}/.environment".format(Path.home()))
+        self.env_vars = dict(sorted(os.environ.items(), key=lambda x: x[0]))
+        self.init_app()
+        self.load_env_file()
+
+        main_style = ttk.Style()
+        main_style.configure("Treeview.Heading", font=tkfont.Font(weight="normal"))
+
+        # frame utama
+        main_frame = ttk.Frame(self)
+        main_frame.pack(anchor="center", padx=(20, 20), pady=(20, 20))
+        
+        # tabel frame
+        self.tabel_frame1 = TabelFrame(main_frame)
+        self.tabel_frame1.pack(anchor="center")
+
+        self.tabel: Tabel = self.tabel_frame1.tabel
+
         # frame tombol konfirmasi
         confirm_frame = ttk.Frame(main_frame)
-        confirm_frame.pack(anchor="e", pady=(20, 0))
+        confirm_frame.pack(side="bottom", anchor="e", pady=(20, 0))
 
         # tombol ok
         btn_ok = ttk.Button(confirm_frame, text="OK", command=self.btn_ok_callback)
@@ -81,16 +101,48 @@ class MainWindow(tk.Tk):
 
         self.new_btn_win = None
 
+    def init_app(self):
+        bashrc_path = Path("{0}/.bashrc".format(Path.home()))
+        profile_path = Path("{0}/.profile".format(Path.home()))
+        
+        script = 'if [ -f ~/.environment ]; then\n\tset -a\n\tsource ~/.environment\n\tset +a\nfi'
+
+        if not self.env_file_path.exists():
+            with self.env_file_path.open("w", encoding="utf-8") as f:   # tulis environment variables ke file ~/.environment
+                for item in self.env_vars.items():
+                    f.write('''{0}="{1}"\n'''.format(*item))
+                f.close()
+
+            with bashrc_path.open("a", encoding="utf-8") as f:
+                f.write("\n"+script.strip()+"\n")
+                f.close()
+
+            with profile_path.open("a", encoding="utf-8") as f:
+                f.write(script.strip()+"\n")
+                f.close()
+
+    def load_env_file(self):
+        pattern = re.compile(r'([_A-Za-z0-9]+?)="(.*)"|([_A-Za-z0-9]+?)=(.*)')
+
+        if self.env_file_path.exists():
+            with self.env_file_path.open("r", encoding="utf-8") as f:
+                for line in f.readlines():
+                    if line.startswith("#"):
+                        continue
+                    matched = pattern.search(str(line.strip()))
+                    print("{0}".format({matched.group(1): matched.group(2)}))
+                f.close()
+
+        return {}
+
     def btn_ok_callback(self):
         print("Data has been submitted")
+        
         self.destroy()
 
     def btn_cancel_callback(self):
         print("Program is closed")
         self.destroy()
-
-    def btn_new_callback(self):
-        self.new_btn_win = NewBtnWindow(self)
 
 
 if __name__ == "__main__":
