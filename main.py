@@ -17,7 +17,7 @@ class Tabel(ttk.Treeview):
         
         self.heading(0, text="Variable", anchor="center")
         self.heading(1, text="Values", anchor="center")
-        self.column(0, width=200)
+        self.column(0, width=250)
         self.column(1, width=300)
         self.bind("<Motion>", "break")
 
@@ -37,12 +37,12 @@ class TabelFrame(ttk.LabelFrame):
         self.data = data
 
         # tabel
-        self.tabel = Tabel(self, column=(0, 1), height=8)
+        self.tabel = Tabel(self, column=(0, 1), height=10)
         self.tabel.pack(anchor="center")
 
         # frame tombol new, edit, dan delete
         btn_frame = ttk.Frame(self)
-        btn_frame.pack(pady=(10, 0), anchor="se", side="bottom")
+        btn_frame.pack(pady=(25, 0), anchor="se", side="bottom")
 
         # tombol new
         btn_new = ttk.Button(btn_frame, text="New", command=self.btn_new_callback)
@@ -94,7 +94,7 @@ class MainWindow(tk.Tk):
 
         # frame tombol konfirmasi
         confirm_frame = ttk.Frame(main_frame)
-        confirm_frame.pack(side="bottom", pady=(10, 0), anchor="se")
+        confirm_frame.pack(side="bottom", pady=(25, 0), anchor="se")
 
         # tombol ok
         btn_ok = ttk.Button(confirm_frame, text="OK", command=self.btn_ok_callback)

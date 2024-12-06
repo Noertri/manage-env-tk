@@ -1,5 +1,7 @@
 import tkinter as tk
+from tkinter import filedialog
 from tkinter import ttk
+from pathlib import Path
 
 
 class NewBtnWindow(tk.Toplevel):
@@ -22,8 +24,11 @@ class NewBtnWindow(tk.Toplevel):
         frame2 = ttk.Frame(frame0)
         frame2.pack(anchor="center", pady=(10, 0))
 
-        frame3 = ttk.Frame(frame0)
-        frame3.pack(anchor=tk.E, pady=(10, 0))
+        btn_frame = ttk.Frame(frame0)
+        btn_frame.pack(anchor="se", pady=(25, 0), side="right")
+
+        btn_frame2 = ttk.Frame(frame0)
+        btn_frame2.pack(anchor="sw", pady=(25, 0))
 
         label1 = ttk.Label(frame1, text="Variable", width=10)
         label1.grid(column=0, row=0, sticky=tk.W)
@@ -32,29 +37,39 @@ class NewBtnWindow(tk.Toplevel):
         label2.grid(column=0, row=1, sticky=tk.W)
 
         # entry box untuk variabel baru
-        self.new_var = ttk.Entry(frame1, width=32, textvariable=self.new_var_data)
-        self.new_var.grid(column=1, row=0, sticky=tk.W)
+        new_var = ttk.Entry(frame1, width=52, textvariable=self.new_var_data)
+        new_var.grid(column=1, row=0, sticky=tk.W)
 
         # entry box untuk nilai variabel baru
-        self.new_values = ttk.Entry(frame2, width=32, textvariable=self.new_values_data)
-        self.new_values.grid(column=1, row=1, sticky=tk.W)
+        new_values = ttk.Entry(frame2, width=52, textvariable=self.new_values_data)
+        new_values.grid(column=1, row=1, sticky=tk.W)
+
+        # tombol browse
+        btn_browse = ttk.Button(btn_frame2, text="Browse", command=self.btn_browse_callback)
+        btn_browse.pack()
 
         # tombol add
-        self.btn_add = ttk.Button(frame3, text="Add", command=self.btn_add_callback)
-        self.btn_add.pack(side="left")
+        btn_add = ttk.Button(btn_frame, text="Add", command=self.btn_add_callback)
+        btn_add.pack(side="left")
 
         # tombol cancel
-        self.btn_cancel = ttk.Button(frame3, text="Cancel", command=self.btn_cancel_callback)
-        self.btn_cancel.pack(padx=(5, 0), side="left")
+        btn_cancel = ttk.Button(btn_frame, text="Cancel", command=self.btn_cancel_callback)
+        btn_cancel.pack(padx=(10, 0))
 
     def btn_add_callback(self):
         self.parent.tabel.insert("", index=0, values=(self.new_var_data.get(), self.new_values_data.get()))
-        self.parent.data["env_file"][self.new_var_data.get()] = self.new_values_data.get()
+    
+        if (k := self.new_var_data.get()) and (v := self.new_values_data.get()):
+            self.parent.data["env_file"][k] = v
+
         self.destroy()
 
     def btn_cancel_callback(self):
         print("Task is aborted")
         self.destroy()
+
+    def btn_browse_callback(self):
+        pass
 
 
 class EditBtnWindow(tk.Toplevel):
