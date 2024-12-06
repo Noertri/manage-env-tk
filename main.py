@@ -3,11 +3,9 @@ from tkinter import ttk
 import tkinter.font as tkfont
 import os
 from pathlib import Path
-import pickle
-import shutil
 import re
 import subprocess
-from popup_windows import NewBtnWindow
+from popup_windows import NewBtnWindow, EditBtnWindow
 
 
 class Tabel(ttk.Treeview):
@@ -40,7 +38,7 @@ class TabelFrame(ttk.LabelFrame):
 
         # tabel
         self.tabel = Tabel(self, column=(0, 1), height=8)
-        self.tabel.pack(anchor="nw")
+        self.tabel.pack(anchor="center")
 
         # frame tombol new, edit, dan delete
         btn_frame = ttk.Frame(self)
@@ -51,7 +49,7 @@ class TabelFrame(ttk.LabelFrame):
         btn_new.pack(side="left")
 
         # tombol edit
-        btn_edit = ttk.Button(btn_frame, text="Edit")
+        btn_edit = ttk.Button(btn_frame, text="Edit", command=self.btn_edit_callback)
         btn_edit.pack(padx=(5, 0), side="left")
 
         # tombol delete
@@ -59,7 +57,10 @@ class TabelFrame(ttk.LabelFrame):
         btn_del.pack(padx=(5, 0), side="left")
 
     def btn_new_callback(self):
-        self.new_btn_win = NewBtnWindow(self)
+        new_btn_win = NewBtnWindow(self)
+
+    def btn_edit_callback(self):
+        edit_btn_window = EditBtnWindow(self)
 
 
 class MainWindow(tk.Tk):
@@ -83,17 +84,17 @@ class MainWindow(tk.Tk):
 
         # frame utama
         main_frame = ttk.Frame(self)
-        main_frame.pack(anchor="center", padx=(20, 20), pady=(20, 20))
+        main_frame.pack(padx=(20, 20), pady=(20, 20))
         
         # tabel frame
         self.tabel_frame1 = TabelFrame(main_frame, self.app_data)
-        self.tabel_frame1.pack(anchor="nw")
+        self.tabel_frame1.pack(anchor="center")
 
         self.tabel: Tabel = self.tabel_frame1.tabel
 
         # frame tombol konfirmasi
         confirm_frame = ttk.Frame(main_frame)
-        confirm_frame.pack(side="bottom", anchor="se", pady=(10, 0))
+        confirm_frame.pack(side="bottom", pady=(10, 0), anchor="se")
 
         # tombol ok
         btn_ok = ttk.Button(confirm_frame, text="OK", command=self.btn_ok_callback)
@@ -102,8 +103,6 @@ class MainWindow(tk.Tk):
         # tombol close
         btn_close = ttk.Button(confirm_frame, text="Close", command=self.btn_close_callback)
         btn_close.pack(padx=(5, 0), side="left")
-
-        self.new_btn_win = None
 
     def init_app(self):
         bashrc_path = Path("{0}/.bashrc".format(Path.home()))
@@ -139,7 +138,7 @@ class MainWindow(tk.Tk):
                 f.write(f'{k}="{v}"\n')
             f.close()
 
-        print("Vriables has been saved")
+        print("Variables has been saved")
         self.destroy()
 
     def btn_close_callback(self):

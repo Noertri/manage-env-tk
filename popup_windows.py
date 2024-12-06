@@ -1,7 +1,5 @@
-import os
 import tkinter as tk
 from tkinter import ttk
-import subprocess
 
 
 class NewBtnWindow(tk.Toplevel):
@@ -16,7 +14,7 @@ class NewBtnWindow(tk.Toplevel):
         self.resizable(False, False)
 
         frame0 = ttk.Frame(self, relief="sunken", padding=(10, 10, 10, 10))
-        frame0.pack(anchor="center", padx=(20, 20), pady=(20, 20))
+        frame0.pack(padx=(20, 20), pady=(20, 20))
 
         frame1 = ttk.Frame(frame0)
         frame1.pack(anchor="center")
@@ -57,3 +55,31 @@ class NewBtnWindow(tk.Toplevel):
     def btn_cancel_callback(self):
         print("Task is aborted")
         self.destroy()
+
+
+class EditBtnWindow(tk.Toplevel):
+    
+    def __init__(self, parent, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.parent = parent
+
+        self.title("Edit Variable")
+        # self.resizable(False, False)
+
+        frame = ttk.Frame(self)
+        frame.pack(anchor="nw", padx=(20, 20), pady=(20, 20))
+
+        entry_frame = ttk.Frame(frame)
+        entry_frame.pack(side="left")
+
+        btn_frame = ttk.Frame(frame)
+        btn_frame.pack(side="left", padx=(10, 0))
+
+        label1 = ttk.Label(entry_frame, text="Variable", width=10)
+        label1.grid(column=0, row=0)
+
+        entry1 = ttk.Entry(entry_frame, width=32, state="disable")
+        entry1.grid(column=1, row=0)
+
+        btn1 = ttk.Button(btn_frame, text="OK")
+        btn1.pack()
