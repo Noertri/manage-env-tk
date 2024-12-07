@@ -14,6 +14,7 @@ class Tabel(ttk.Treeview):
         super().__init__(parent, show="headings", *args, **kwargs)
         
         self.parent = parent
+        self.selected_items = []
         
         self.heading(0, text="Variable", anchor="center")
         self.heading(1, text="Values", anchor="center")
@@ -35,9 +36,11 @@ class TabelPanel(ttk.LabelFrame):
         super().__init__(parent, text="User Variables", padding=(10, 10, 10, 10), *args, **kwargs)
         self.parent = parent
         self.data = data
+        self.selected_item = None
 
         # tabel
         self.tabel = Tabel(self, column=(0, 1), height=10)
+        self.tabel.bind("<<TreeviewSelect>>", self.treeview_selection_handler)
         self.tabel.pack(anchor="center")
 
         # frame tombol new, edit, dan delete
@@ -49,18 +52,20 @@ class TabelPanel(ttk.LabelFrame):
         btn_new.pack(side="left")
 
         # tombol edit
-        btn_edit = ttk.Button(btn_frame, text="Edit", command=self.btn_edit_callback)
-        btn_edit.pack(padx=(5, 0), side="left")
+        self.btn_edit = ttk.Button(btn_frame, text="Edit")
+        self.btn_edit.pack(padx=(5, 0), side="left")
 
         # tombol delete
-        btn_del = ttk.Button(btn_frame, text="Delete")
-        btn_del.pack(padx=(5, 0), side="left")
+        self.btn_del = ttk.Button(btn_frame, text="Delete")
+        self.btn_del.pack(padx=(5, 0), side="left")
 
     def btn_new_callback(self):
         new_btn_win = NewBtnWindow(self)
 
-    def btn_edit_callback(self):
-        edit_btn_window = EditBtnWindow(self)
+    def treeview_selection_handler(self, event):
+        for item in self.tabel.selection():
+            args = self.tabel.item(item)["values"]
+            self.btn_edit.configure(command=lambda : EditBtnWindow(self, args))
 
 
 class MainWindow(tk.Tk):
