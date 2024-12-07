@@ -32,11 +32,9 @@ class Tabel(ttk.Treeview):
 
 class TabelPanel(ttk.LabelFrame):
 
-    def __init__(self, parent, data, *args, **kwargs):
+    def __init__(self, parent, *args, **kwargs):
         super().__init__(parent, text="User Variables", padding=(10, 10, 10, 10), *args, **kwargs)
         self.parent = parent
-        self.data = data
-        self.selected_item = None
 
         # tabel
         self.tabel = Tabel(self, column=(0, 1), height=10)
@@ -60,12 +58,13 @@ class TabelPanel(ttk.LabelFrame):
         self.btn_del.pack(padx=(5, 0), side="left")
 
     def btn_new_callback(self):
-        new_btn_win = NewBtnWindow(self)
+        NewBtnWindow(self)
 
     def treeview_selection_handler(self, event):
         for item in self.tabel.selection():
             args = self.tabel.item(item)["values"]
-            self.btn_edit.configure(command=lambda : EditBtnWindow(self, args))
+            setattr(self, "selected_items", args)
+            self.btn_edit.configure(command=lambda : EditBtnWindow(self))
 
 
 class MainWindow(tk.Tk):
@@ -83,6 +82,7 @@ class MainWindow(tk.Tk):
             "env_file": self.load_env_file()
         }
         self.init_app()
+        setattr(TabelPanel, "app_data", self.app_data)
 
         main_style = ttk.Style()
         main_style.configure("Treeview.Heading", font=tkfont.Font(weight="normal"))
@@ -92,9 +92,9 @@ class MainWindow(tk.Tk):
         main_frame.pack(padx=(20, 20), pady=(20, 20))
         
         # tabel frame
-        self.tabel_panel = TabelPanel(main_frame, self.app_data)
+        self.tabel_panel = TabelPanel(main_frame)
         self.tabel_panel.pack(anchor="center")
-
+        
         self.tabel = self.tabel_panel.tabel
 
         # frame tombol konfirmasi
