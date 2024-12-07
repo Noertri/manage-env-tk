@@ -1,10 +1,9 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import tkinter.font as tkfont
 import os
 from pathlib import Path
 import re
-import subprocess
 from popup_windows import NewBtnWindow, EditBtnWindow
 
 
@@ -60,8 +59,8 @@ class TabelPanel(ttk.LabelFrame):
     def btn_del_callback(self, selected_items):
         try:
             items = self.tabel.item(selected_items)["values"]
-            print(items)
-            self.tabel.delete(selected_items)
+            messagebox.askquestion("Konfirmasi", "Apakah kamu yakin ingin menghapus variabel ini?")
+            # self.tabel.delete(selected_items)
         except Exception as e:
             raise e
 
