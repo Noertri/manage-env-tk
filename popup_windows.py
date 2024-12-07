@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, scrolledtext
+from tkinter import ttk
 from pathlib import Path
 
 
@@ -15,13 +15,13 @@ class NewBtnWindow(tk.Toplevel):
         self.resizable(False, False)
 
         frame0 = ttk.Frame(self, padding=(10, 10, 10, 10), relief="sunken")
-        frame0.pack(padx=(20, 20), pady=(20, 20))
+        frame0.pack(padx=(20, 20), pady=(20, 20), anchor="nw")
 
         frame1 = ttk.Frame(frame0)
-        frame1.pack(anchor="center")
+        frame1.pack()
 
         frame2 = ttk.Frame(frame0)
-        frame2.pack(anchor="center", pady=(10, 0))
+        frame2.pack(pady=(10, 0))
 
         btn_frame = ttk.Frame(frame0)
         btn_frame.pack(anchor="se", pady=(25, 0), side="right")
@@ -49,12 +49,10 @@ class NewBtnWindow(tk.Toplevel):
         btn_cancel.pack(padx=(10, 0))
 
     def btn_add_callback(self):
-        self.parent.tabel.insert("", index=0, values=(self.new_var_data.get(), self.new_values_data.get()))
-    
-        if (k := self.new_var_data.get()) and (v := self.new_values_data.get()):
+        if (k := self.new_var_data.get().strip()) and (v := self.new_values_data.get().strip()):
+            self.parent.tabel.insert("", index=0, values=(k, v))
             self.parent.app_data["env_file"][k] = v
-
-        self.destroy()
+            self.destroy()
 
     def btn_cancel_callback(self):
         print("Task is aborted")
@@ -69,33 +67,37 @@ class TextBoxPanel(ttk.Frame):
         self.data = parent.selected_items
         selected_values = self.data[1].replace(":", "\n") if len(self.data[1]) > 40 else self.data[1]
 
-        main_frame = ttk.Frame(self, padding=(20, 20, 20, 20), relief="sunken")
+        main_frame = ttk.Frame(self, padding=(10, 10, 10, 10), relief="sunken")
         main_frame.pack()
         
         # bagian yang menampilkan nama variabel yang dipilih
         label = ttk.Label(main_frame, text="Variable:", width=10)
         label.grid(column=0, row=0, sticky=tk.NW)
 
-        var_name = ttk.Entry(main_frame, width=40)
+        var_name = ttk.Entry(main_frame)
         var_name.insert(0, self.data[0])
-        var_name.grid(column=1, row=0, sticky=tk.NW, padx=(10, 0))
+        var_name.grid(column=1, row=0, sticky=tk.W+tk.E, padx=(10, 0))
 
         # bagian yang menampilkan nilai variabel yang dipilih
+        text_box_frame = ttk.Frame(main_frame)
+        text_box_frame.grid(column=1, row=1, sticky=tk.NW+tk.SE)
+
         label2 = ttk.Label(main_frame, text="Value(s):", width=10)
         label2.grid(column=0, row=1, sticky=tk.NW, pady=(10, 0))
 
-        val_entry = tk.Text(main_frame, height=8, width=40, wrap="none")
-        val_entry.insert("1.0", selected_values)
-        val_entry.grid(column=1, row=1, sticky=tk.NW, padx=(10,0), pady=(10, 0))
+        val_entry = tk.Text(text_box_frame, height=8, width=40, wrap="none")
+        val_entry.insert(tk.END, selected_values)
+        val_entry.insert(tk.END, "\n")
+        val_entry.grid(column=1, row=1, sticky=tk.NW+tk.SE, padx=(10,0), pady=(10, 0))
 
         # scrollbar sumbu x
-        xscroll = tk.Scrollbar(main_frame, orient="horizontal")
+        xscroll = tk.Scrollbar(text_box_frame, orient="horizontal")
         xscroll.configure(command=val_entry.xview)
         val_entry.configure(xscrollcommand=xscroll.set)
         xscroll.grid(column=1, row=2, sticky=tk.W+tk.E, padx=(10, 0))
 
         # scrollbar sumbu y
-        yscroll = tk.Scrollbar(main_frame, orient="vertical")
+        yscroll = tk.Scrollbar(text_box_frame, orient="vertical")
         yscroll.configure(command=val_entry.yview)
         val_entry.configure(yscrollcommand=yscroll.set)
         yscroll.grid(column=2, row=1, sticky=tk.N+tk.S, pady=(10, 0))

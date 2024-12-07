@@ -39,14 +39,14 @@ class TabelPanel(ttk.LabelFrame):
         # tabel
         self.tabel = Tabel(self, column=(0, 1), height=10)
         self.tabel.bind("<<TreeviewSelect>>", self.treeview_selection_handler)
-        self.tabel.pack(anchor="center")
+        self.tabel.pack(fill="both")
 
         # frame tombol new, edit, dan delete
         btn_frame = ttk.Frame(self)
         btn_frame.pack(pady=(25, 0), anchor="se", side="bottom")
 
         # tombol new
-        btn_new = ttk.Button(btn_frame, text="New", command=self.btn_new_callback)
+        btn_new = ttk.Button(btn_frame, text="New", command=lambda : NewBtnWindow(self))
         btn_new.pack(side="left")
 
         # tombol edit
@@ -57,14 +57,20 @@ class TabelPanel(ttk.LabelFrame):
         self.btn_del = ttk.Button(btn_frame, text="Delete")
         self.btn_del.pack(padx=(5, 0), side="left")
 
-    def btn_new_callback(self):
-        NewBtnWindow(self)
+    def btn_del_callback(self, selected_items):
+        try:
+            items = self.tabel.item(selected_items)["values"]
+            print(items)
+            self.tabel.delete(selected_items)
+        except Exception as e:
+            raise e
 
     def treeview_selection_handler(self, event):
         for item in self.tabel.selection():
-            args = self.tabel.item(item)["values"]
-            setattr(self, "selected_items", args)
+            selected_items = self.tabel.item(item)["values"]
+            setattr(self, "selected_items", selected_items)
             self.btn_edit.configure(command=lambda : EditBtnWindow(self))
+            self.btn_del.configure(command=lambda : self.btn_del_callback(item))
 
 
 class MainWindow(tk.Tk):
@@ -89,7 +95,7 @@ class MainWindow(tk.Tk):
 
         # frame utama
         main_frame = ttk.Frame(self)
-        main_frame.pack(padx=(20, 20), pady=(20, 20))
+        main_frame.pack(padx=(20, 20), pady=(20, 20), anchor="nw")
         
         # tabel frame
         self.tabel_panel = TabelPanel(main_frame)
