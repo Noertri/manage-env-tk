@@ -1,6 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog
-from tkinter import ttk
+from tkinter import ttk, scrolledtext
 from pathlib import Path
 
 
@@ -15,7 +14,7 @@ class NewBtnWindow(tk.Toplevel):
         self.title("New Variable")
         self.resizable(False, False)
 
-        frame0 = ttk.Frame(self, padding=(10, 10, 10, 10))
+        frame0 = ttk.Frame(self, padding=(10, 10, 10, 10), relief="sunken")
         frame0.pack(padx=(20, 20), pady=(20, 20))
 
         frame1 = ttk.Frame(frame0)
@@ -62,33 +61,44 @@ class NewBtnWindow(tk.Toplevel):
         self.destroy()
 
 
-class ListBoxPanel(ttk.Frame):
+class TextBoxPanel(ttk.Frame):
 
     def __init__(self, parent, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
         self.parent = parent
         self.data = parent.selected_items
-        selected_items = tk.StringVar(value=self.data[1].split(":")) if len(self.data[1]) > 40 else tk.StringVar(value=self.data[1])
+        selected_values = self.data[1].replace(":", "\n") if len(self.data[1]) > 40 else self.data[1]
 
-        list_box_frame = ttk.Frame(self)
-        list_box_frame.pack()
+        main_frame = ttk.Frame(self, padding=(20, 20, 20, 20), relief="sunken")
+        main_frame.pack()
         
         # bagian yang menampilkan nama variabel yang dipilih
-        label = ttk.Label(list_box_frame, text="Variable:", width=10)
+        label = ttk.Label(main_frame, text="Variable:", width=10)
         label.grid(column=0, row=0, sticky=tk.NW)
 
-        var_name = ttk.Label(list_box_frame, text=self.data[0], width=40)
+        var_name = ttk.Entry(main_frame, width=40)
+        var_name.insert(0, self.data[0])
         var_name.grid(column=1, row=0, sticky=tk.NW, padx=(10, 0))
 
         # bagian yang menampilkan nilai variabel yang dipilih
-        label2 = ttk.Label(list_box_frame, text="Value(s):", width=10)
+        label2 = ttk.Label(main_frame, text="Value(s):", width=10)
         label2.grid(column=0, row=1, sticky=tk.NW, pady=(10, 0))
 
-        val_entry = ttk.Entry(list_box_frame, width=40)
+        val_entry = tk.Text(main_frame, height=8, width=40, wrap="none")
+        val_entry.insert("1.0", selected_values)
         val_entry.grid(column=1, row=1, sticky=tk.NW, padx=(10,0), pady=(10, 0))
 
-        list_box = tk.Listbox(list_box_frame, width=40, listvariable=selected_items)
-        list_box.grid(column=1, row=2, sticky=tk.NW, padx=(10, 0), pady=(10, 0))
+        # scrollbar sumbu x
+        xscroll = tk.Scrollbar(main_frame, orient="horizontal")
+        xscroll.configure(command=val_entry.xview)
+        val_entry.configure(xscrollcommand=xscroll.set)
+        xscroll.grid(column=1, row=2, sticky=tk.W+tk.E, padx=(10, 0))
+
+        # scrollbar sumbu y
+        yscroll = tk.Scrollbar(main_frame, orient="vertical")
+        yscroll.configure(command=val_entry.yview)
+        val_entry.configure(yscrollcommand=yscroll.set)
+        yscroll.grid(column=2, row=1, sticky=tk.N+tk.S, pady=(10, 0))
 
 
 class EditBtnWindow(tk.Toplevel):
@@ -104,7 +114,7 @@ class EditBtnWindow(tk.Toplevel):
         setattr(frame0, "selected_items", self.parent.selected_items)
         frame0.pack(anchor="nw", padx=(20, 20), pady=(20, 20))
         
-        list_box_panel = ListBoxPanel(frame0)
+        list_box_panel = TextBoxPanel(frame0)
         list_box_panel.pack()
 
         btn_frame = ttk.Frame(frame0)
