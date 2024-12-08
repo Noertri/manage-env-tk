@@ -306,4 +306,5 @@ pyrightconfig.json
 .ionide
 
 *.bak
+.environment
 # End of https://www.toptal.com/developers/gitignore/api/python,pycharm,visualstudiocode

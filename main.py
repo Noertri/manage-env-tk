@@ -87,18 +87,24 @@ class MainWindow(tk.Tk):
 
     def __init__(self, app_title):
         super().__init__()
-        self.title(app_title)
-        # self.geometry("500x500")
-        self.resizable(False, False)
+        self.app_title = app_title
         
         # inisialisai program
-        self.env_file_path = Path("{0}/.environment".format(Path.home()))
+        self.env_file_path = Path("{0}/.environment".format(Path.cwd()))
         self.env_vars = dict(sorted(os.environ.items(), key=lambda x: x[0]))
         self.app_data = {
             "env_file": self.load_env_file()
         }
         self.init_app()
         setattr(TabelPanel, "app_data", self.app_data)
+
+        # inisialisai ui
+        self.init_ui()
+
+    def init_ui(self):
+        self.title(self.app_title)
+        # self.geometry("500x500")
+        self.resizable(False, False)
 
         main_style = ttk.Style()
         main_style.configure("Treeview.Heading", font=tkfont.Font(weight="normal"))
@@ -110,8 +116,6 @@ class MainWindow(tk.Tk):
         # tabel frame
         self.tabel_panel = TabelPanel(main_frame)
         self.tabel_panel.pack(anchor="center")
-        
-        self.tabel = self.tabel_panel.tabel
 
         # frame tombol konfirmasi
         confirm_frame = ttk.Frame(main_frame)

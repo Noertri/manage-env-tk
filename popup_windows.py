@@ -14,7 +14,7 @@ class NewBtnWindow(tk.Toplevel):
         self.resizable(False, False)
         self.geometry("500x200")
 
-        frame0 = ttk.Frame(self, padding=(10, 10, 10, 10), relief="sunken")
+        frame0 = ttk.Frame(self, padding=(10, 10, 10, 10))
         frame0.pack(padx=(20, 20), pady=(20, 20), anchor="nw", fill="both")
 
         frame1 = ttk.Frame(frame0)
@@ -69,22 +69,19 @@ class TextBoxPanel(ttk.Frame):
         self.data = parent.selected_items
         selected_values = self.data[1].replace(":", "\n") if len(self.data[1]) > 40 else self.data[1]
 
-        main_frame = ttk.Frame(self, padding=(10, 10, 10, 10), relief="sunken")
-        main_frame.pack()
-        
         # bagian yang menampilkan nama variabel yang dipilih
-        label = ttk.Label(main_frame, text="Variable:", width=10)
+        label = ttk.Label(self, text="Variable:", width=10)
         label.grid(column=0, row=0, sticky=tk.NW)
 
-        self.var_input = ttk.Entry(main_frame)
+        self.var_input = ttk.Entry(self)
         self.var_input.insert(0, self.data[0])
         self.var_input.grid(column=1, row=0, sticky=tk.W+tk.E, padx=(10, 0))
 
         # bagian yang menampilkan nilai variabel yang dipilih
-        text_box_frame = ttk.Frame(main_frame)
+        text_box_frame = ttk.Frame(self)
         text_box_frame.grid(column=1, row=1, sticky=tk.NW+tk.SE)
 
-        label2 = ttk.Label(main_frame, text="Value(s):", width=10)
+        label2 = ttk.Label(self, text="Value(s):", width=10)
         label2.grid(column=0, row=1, sticky=tk.NW, pady=(10, 0))
 
         self.val_input = tk.Text(text_box_frame, height=8, width=52, wrap="none")
@@ -103,11 +100,7 @@ class TextBoxPanel(ttk.Frame):
         self.val_input.configure(yscrollcommand=yscroll.set)
         yscroll.grid(column=2, row=1, sticky=tk.N+tk.S, pady=(10, 0))
 
-        # simpan data ke app_data
-        if (k := self.var_input.get()) and (v := self.val_input.get("1.0", tk.END).strip()):
-            self.parent.app_data["env_file"][k] = v.replace("\n", ":")
-
-
+        
 class EditBtnWindow(tk.Toplevel):
     
     def __init__(self, parent, *args, **kwargs):
@@ -117,13 +110,13 @@ class EditBtnWindow(tk.Toplevel):
         self.title("Edit Variable")
         self.resizable(False, False)
 
-        frame0 = ttk.Frame(self)
+        frame0 = ttk.Frame(self, padding=(10, 10, 10, 10))
         setattr(frame0, "selected_items", self.parent.selected_items)
         setattr(frame0, "app_data", self.parent.app_data)
         frame0.pack(anchor="nw", padx=(20, 20), pady=(20, 20))
         
-        text_panel = TextBoxPanel(frame0)
-        text_panel.pack()
+        self.text_panel = TextBoxPanel(frame0)
+        self.text_panel.pack(anchor="nw")
 
         btn_frame = ttk.Frame(frame0)
         btn_frame.pack(side="bottom", anchor="se", pady=(25, 0))
@@ -136,9 +129,17 @@ class EditBtnWindow(tk.Toplevel):
 
     def btn_cancel_callback(self):
         self.parent.edit_btn_window = None
+        self.parent.app_data["btn_edit_confirm"] = False
         self.destroy()
 
     def btn_save_callback(self):
         self.parent.edit_btn_window = None
         if hasattr(self.parent, "app_data"):
-            print(self.parent.app_data)
+            self.parent.app_data["btn_edit_confirm"] = True
+            
+            # simpan data ke app_data
+            if (k := self.text_panel.var_input.get()) and (v := self.text_panel.val_input.get("1.0", tk.END).strip()):
+                self.parent.app_data["env_file"][k] = v.replace("\n", ":")
+                print(self.parent.app_data)
+
+                # self.destroy()
