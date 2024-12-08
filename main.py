@@ -4,6 +4,7 @@ import tkinter.font as tkfont
 import os
 from pathlib import Path
 import re
+import subprocess
 from popup_windows import NewBtnWindow, EditBtnWindow
 
 
@@ -152,11 +153,18 @@ class MainWindow(tk.Tk):
 
         return env
 
-    def btn_ok_callback(self):
+    def save_to_file(self):
         with self.env_file_path.open("w", encoding="utf-8") as f:
             for k, v in self.app_data["env_file"].items():
                 f.write(f'{k}="{v}"\n')
             f.close()
+
+    def btn_ok_callback(self):
+        if self.app_data.get("btn_new_confirm", False):
+            self.save_to_file()
+        
+        if self.app_data.get("btn_edit_confirm", False):
+            self.save_to_file()
 
         self.quit()
 
