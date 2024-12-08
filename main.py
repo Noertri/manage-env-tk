@@ -34,6 +34,8 @@ class TabelPanel(ttk.LabelFrame):
     def __init__(self, parent, *args, **kwargs):
         super().__init__(parent, text="User Variables", padding=(10, 10, 10, 10), *args, **kwargs)
         self.parent = parent
+        self.new_btn_window: NewBtnWindow = None
+        self.edit_btn_window: EditBtnWindow = None
 
         # tabel
         self.tabel = Tabel(self, column=(0, 1), height=10)
@@ -45,7 +47,7 @@ class TabelPanel(ttk.LabelFrame):
         btn_frame.pack(pady=(25, 0), anchor="se", side="bottom")
 
         # tombol new
-        btn_new = ttk.Button(btn_frame, text="New", command=lambda : NewBtnWindow(self))
+        btn_new = ttk.Button(btn_frame, text="New", command=self.btn_new_callback)
         btn_new.pack(side="left")
 
         # tombol edit
@@ -56,10 +58,18 @@ class TabelPanel(ttk.LabelFrame):
         self.btn_del = ttk.Button(btn_frame, text="Delete")
         self.btn_del.pack(padx=(5, 0), side="left")
 
+    def btn_new_callback(self):
+        if self.new_btn_window is None:
+            self.new_btn_window = NewBtnWindow(self)
+
+    def btn_edit_callback(self, parent):
+        if self.edit_btn_window is None:
+            self.edit_btn_window = EditBtnWindow(parent)
+
     def btn_del_callback(self, selected_items):
         try:
             items = self.tabel.item(selected_items)["values"]
-            messagebox.askquestion("Konfirmasi", "Apakah kamu yakin ingin menghapus variabel ini?")
+            messagebox.askquestion("Konfirmasi", f"Apakah kamu yakin ingin menghapus variabel '{items[0]}'?")
             # self.tabel.delete(selected_items)
         except Exception as e:
             raise e
@@ -68,7 +78,7 @@ class TabelPanel(ttk.LabelFrame):
         for item in self.tabel.selection():
             selected_items = self.tabel.item(item)["values"]
             setattr(self, "selected_items", selected_items)
-            self.btn_edit.configure(command=lambda : EditBtnWindow(self))
+            self.btn_edit.configure(command=lambda : self.btn_edit_callback(self))
             self.btn_del.configure(command=lambda : self.btn_del_callback(item))
 
 
@@ -148,12 +158,10 @@ class MainWindow(tk.Tk):
                 f.write(f'{k}="{v}"\n')
             f.close()
 
-        print("Variables has been saved")
-        self.destroy()
+        self.quit()
 
     def btn_close_callback(self):
-        print("Program is closed")
-        self.destroy()
+        self.quit()
 
 
 if __name__ == "__main__":

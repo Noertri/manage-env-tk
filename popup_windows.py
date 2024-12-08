@@ -49,13 +49,15 @@ class NewBtnWindow(tk.Toplevel):
         btn_cancel.pack(padx=(10, 0))
 
     def btn_add_callback(self):
+        self.parent.new_btn_window = None
         if (k := self.new_var_data.get().strip()) and (v := self.new_values_data.get().strip()):
             self.parent.tabel.insert("", index=0, values=(k, v))
             self.parent.app_data["env_file"][k] = v
             self.destroy()
 
+
     def btn_cancel_callback(self):
-        print("Task is aborted")
+        self.parent.new_btn_window = None
         self.destroy()
 
 
@@ -122,11 +124,12 @@ class EditBtnWindow(tk.Toplevel):
         btn_frame = ttk.Frame(frame0)
         btn_frame.pack(side="bottom", anchor="se", pady=(25, 0))
 
-        btn_ok = ttk.Button(btn_frame, text="OK")
-        btn_ok.pack(side="left")
+        btn_save = ttk.Button(btn_frame, text="OK")
+        btn_save.pack(side="left")
 
         btn_cancel = ttk.Button(btn_frame, text="Cancel", command=self.btn_cancel_callback)
         btn_cancel.pack(padx=(10, 0))
 
     def btn_cancel_callback(self):
+        self.parent.edit_btn_window = None
         self.destroy()
