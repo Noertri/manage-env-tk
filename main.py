@@ -22,12 +22,9 @@ class Tabel(ttk.Treeview):
         self.column(1, width=300)
         self.bind("<Motion>", "break")
 
-        # memuat environment variables
-        self.load_env_vars()
-
-    def load_env_vars(self):
-        for item in sorted(dict(os.environ).items(), key=lambda x: x[0]):
-            self.insert("", index=tk.END, values=item)
+        # memuat environment variables dari os
+        for item in self.parent.app_data.get("env_os", {}).items():
+            self.insert("", index=tk.END, values=item)   
 
 
 class TabelPanel(ttk.LabelFrame):
@@ -90,10 +87,11 @@ class MainWindow(tk.Tk):
         self.app_title = app_title
         
         # inisialisai program
-        self.env_file_path = Path("{0}/.environment".format(Path.cwd()))
+        self.env_file_path = Path("{0}/.environment".format(Path.home()))
         self.env_vars = dict(sorted(os.environ.items(), key=lambda x: x[0]))
         self.app_data = {
-            "env_file": self.load_env_file()
+            "env_file": self.load_env_file(),
+            "env_os": dict(sorted(dict(os.environ).items(), key=lambda x: x[0]))
         }
         self.init_app()
         setattr(TabelPanel, "app_data", self.app_data)
@@ -169,8 +167,6 @@ class MainWindow(tk.Tk):
         
         if self.app_data.get("btn_edit_confirm", False):
             self.save_to_file()
-
-        self.quit()
 
     def btn_close_callback(self):
         self.quit()

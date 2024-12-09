@@ -132,14 +132,21 @@ class EditBtnWindow(tk.Toplevel):
         self.parent.app_data["btn_edit_confirm"] = False
         self.destroy()
 
+    def check_values(self, k, v):
+        old_v = self.parent.app_data["env_os"].get(k, "").split(":")
+        if len(v) > len(old_v):
+            v = list(set(v) - set(old_v))
+            v = ":".join(v)
+            return f"{v}:${k}"
+        else:
+            return v
+
     def btn_save_callback(self):
         self.parent.edit_btn_window = None
         if hasattr(self.parent, "app_data"):
             self.parent.app_data["btn_edit_confirm"] = True
             
             # simpan data ke app_data
-            if (k := self.text_panel.var_input.get()) and (v := self.text_panel.val_input.get("1.0", tk.END).strip()):
-                self.parent.app_data["env_file"][k] = v.replace("\n", ":")
-                print(self.parent.app_data)
-
-                # self.destroy()
+            if (k := self.text_panel.var_input.get()) and (v := self.text_panel.val_input.get("1.0", tk.END).strip().split("\n")):
+                self.parent.app_data["env_file"][k] = self.check_values(k, v)
+                self.destroy()
