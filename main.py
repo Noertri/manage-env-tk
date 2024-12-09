@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import tkinter.font as tkfont
 import os
 from pathlib import Path
@@ -14,6 +14,7 @@ class Tabel(ttk.Treeview):
         super().__init__(parent, show="headings", *args, **kwargs)
         
         self.parent = parent
+        self.selected_items = []
         
         self.heading(0, text="Variable", anchor="center")
         self.heading(1, text="Values", anchor="center")
@@ -21,24 +22,23 @@ class Tabel(ttk.Treeview):
         self.column(1, width=300)
         self.bind("<Motion>", "break")
 
-        # memuat environment variables
-        self.load_env_vars()
-
-    def load_env_vars(self):
-        for item in sorted(dict(os.environ).items(), key=lambda x: x[0]):
-            self.insert("", index=tk.END, values=item)
+        # memuat environment variables dari os
+        for item in self.parent.app_data.get("env_os", {}).items():
+            self.insert("", index=tk.END, values=item)   
 
 
 class TabelPanel(ttk.LabelFrame):
 
-    def __init__(self, parent, data, *args, **kwargs):
+    def __init__(self, parent, *args, **kwargs):
         super().__init__(parent, text="User Variables", padding=(10, 10, 10, 10), *args, **kwargs)
         self.parent = parent
-        self.data = data
+        self.new_btn_window: NewBtnWindow = None
+        self.edit_btn_window: EditBtnWindow = None
 
         # tabel
         self.tabel = Tabel(self, column=(0, 1), height=10)
-        self.tabel.pack(anchor="center")
+        self.tabel.bind("<<TreeviewSelect>>", self.treeview_selection_handler)
+        self.tabel.pack(fill="both")
 
         # frame tombol new, edit, dan delete
         btn_frame = ttk.Frame(self)
@@ -49,48 +49,71 @@ class TabelPanel(ttk.LabelFrame):
         btn_new.pack(side="left")
 
         # tombol edit
-        btn_edit = ttk.Button(btn_frame, text="Edit", command=self.btn_edit_callback)
-        btn_edit.pack(padx=(5, 0), side="left")
+        self.btn_edit = ttk.Button(btn_frame, text="Edit")
+        self.btn_edit.pack(padx=(5, 0), side="left")
 
         # tombol delete
-        btn_del = ttk.Button(btn_frame, text="Delete")
-        btn_del.pack(padx=(5, 0), side="left")
+        self.btn_del = ttk.Button(btn_frame, text="Delete")
+        self.btn_del.pack(padx=(5, 0), side="left")
 
     def btn_new_callback(self):
-        new_btn_win = NewBtnWindow(self)
+        if self.new_btn_window is None:
+            self.new_btn_window = NewBtnWindow(self)
 
-    def btn_edit_callback(self):
-        edit_btn_window = EditBtnWindow(self)
+    def btn_edit_callback(self, parent):
+        if self.edit_btn_window is None:
+            self.edit_btn_window = EditBtnWindow(parent)
+
+    def btn_del_callback(self, selected_items):
+        try:
+            items = self.tabel.item(selected_items)["values"]
+            messagebox.askquestion("Konfirmasi", f"Apakah kamu yakin ingin menghapus variabel '{items[0]}'?")
+            # self.tabel.delete(selected_items)
+        except Exception as e:
+            raise e
+
+    def treeview_selection_handler(self, event):
+        for item in self.tabel.selection():
+            selected_items = self.tabel.item(item)["values"]
+            setattr(self, "selected_items", selected_items)
+            self.btn_edit.configure(command=lambda : self.btn_edit_callback(self))
+            self.btn_del.configure(command=lambda : self.btn_del_callback(item))
 
 
 class MainWindow(tk.Tk):
 
     def __init__(self, app_title):
         super().__init__()
-        self.title(app_title)
-        # self.geometry("500x500")
-        self.resizable(False, False)
+        self.app_title = app_title
         
         # inisialisai program
         self.env_file_path = Path("{0}/.environment".format(Path.home()))
         self.env_vars = dict(sorted(os.environ.items(), key=lambda x: x[0]))
         self.app_data = {
-            "env_file": self.load_env_file()
+            "env_file": self.load_env_file(),
+            "env_os": dict(sorted(dict(os.environ).items(), key=lambda x: x[0]))
         }
         self.init_app()
+        setattr(TabelPanel, "app_data", self.app_data)
+
+        # inisialisai ui
+        self.init_ui()
+
+    def init_ui(self):
+        self.title(self.app_title)
+        # self.geometry("500x500")
+        self.resizable(False, False)
 
         main_style = ttk.Style()
         main_style.configure("Treeview.Heading", font=tkfont.Font(weight="normal"))
 
         # frame utama
         main_frame = ttk.Frame(self)
-        main_frame.pack(padx=(20, 20), pady=(20, 20))
+        main_frame.pack(padx=(20, 20), pady=(20, 20), anchor="nw")
         
         # tabel frame
-        self.tabel_panel = TabelPanel(main_frame, self.app_data)
+        self.tabel_panel = TabelPanel(main_frame)
         self.tabel_panel.pack(anchor="center")
-
-        self.tabel = self.tabel_panel.tabel
 
         # frame tombol konfirmasi
         confirm_frame = ttk.Frame(main_frame)
@@ -132,18 +155,21 @@ class MainWindow(tk.Tk):
 
         return env
 
-    def btn_ok_callback(self):
+    def save_to_file(self):
         with self.env_file_path.open("w", encoding="utf-8") as f:
             for k, v in self.app_data["env_file"].items():
                 f.write(f'{k}="{v}"\n')
             f.close()
 
-        print("Variables has been saved")
-        self.destroy()
+    def btn_ok_callback(self):
+        if self.app_data.get("btn_new_confirm", False):
+            self.save_to_file()
+        
+        if self.app_data.get("btn_edit_confirm", False):
+            self.save_to_file()
 
     def btn_close_callback(self):
-        print("Program is closed")
-        self.destroy()
+        self.quit()
 
 
 if __name__ == "__main__":
